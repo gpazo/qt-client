@@ -327,9 +327,13 @@ int main(int argc, char *argv[])
 	// PostgreSQL changed the column "procpid" to just "pid" in 9.2.0+ Incident #21852
 	XSqlQuery checkVersion(QString("select compareversion('9.2.0');"));
 
+    checkVersion.exec();
+
     if(checkVersion.first())
     {
-      if(checkVersion.value("compareversion").toInt() <= 0)
+      qDebug () << "what the fuck!";
+      int result = checkVersion.value("compareversion").toInt();
+      if(result <= 0)
       {
 	   metric.exec("SELECT count(*) AS registered, (SELECT count(*) FROM pg_stat_activity WHERE datname=current_database()) AS total"
 			"  FROM pg_stat_activity, pg_locks"
@@ -338,7 +342,7 @@ int main(int argc, char *argv[])
 			"   AND (objsubid=2)"
 			"   AND (procpid = pg_backend_pid()));");
       }
-	  else
+      else if (result > 0)
 	  {
 	   metric.exec("SELECT count(*) AS registered, (SELECT count(*) FROM pg_stat_activity WHERE datname=current_database()) AS total"
 			"  FROM pg_stat_activity, pg_locks"
@@ -415,7 +419,7 @@ int main(int argc, char *argv[])
       else if(pkey.users() != 0 && (pkey.users() < cnt || (!xtweb && (pkey.users() * 2 < tot))))
       {
         checkPass = false;
-        checkPassReason = QObject::tr("<p>You have exceeded the number of allowed concurrent users for your license.");
+        checkPassReason = QObject::tr("<p>You have exceeded the number of allowed concurrent users for your license.%1 %2 %3").arg(pkey.users()).arg(cnt).arg(tot);
         checkLock = forced = forceLimit;
       }
       else
