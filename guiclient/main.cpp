@@ -329,18 +329,26 @@ int main(int argc, char *argv[])
 
     checkVersion.exec();
 
+    int cnt = 50000;
+    int tot = 50000;
+
     if(checkVersion.first())
     {
-      qDebug () << "what the fuck!";
       int result = checkVersion.value("compareversion").toInt();
       if(result <= 0)
       {
-	   metric.exec("SELECT count(*) AS registered, (SELECT count(*) FROM pg_stat_activity WHERE datname=current_database()) AS total"
+       metric.exec("SELECT count(*) AS registered, (SELECT count(*) FROM pg_stat_activity WHERE datname=current_database()) AS total"
 			"  FROM pg_stat_activity, pg_locks"
 			" WHERE((database=datid)"
 			"   AND (classid=datid)"
 			"   AND (objsubid=2)"
 			"   AND (procpid = pg_backend_pid()));");
+       if(metric.first())
+       {
+           qDebug() << "did we make it here?" ;
+         cnt = metric.value("registered").toInt();
+         tot = metric.value("total").toInt();
+       }
       }
       else if (result > 0)
 	  {
@@ -350,16 +358,15 @@ int main(int argc, char *argv[])
 			"   AND (classid=datid)"
 			"   AND (objsubid=2)"
 			"   AND (pg_stat_activity.pid = pg_backend_pid()));");
+      if(metric.first())
+      {
+          qDebug() << "or we make it here?" ;
+        cnt = metric.value("registered").toInt();
+        tot = metric.value("total").toInt();
+      }
       }
     }
 	
-    int cnt = 50000;
-    int tot = 50000;
-    if(metric.first())
-    {
-      cnt = metric.value("registered").toInt();
-      tot = metric.value("total").toInt();
-    }
     metric.exec("SELECT packageIsEnabled('drupaluserinfo') AS result;");
     bool xtweb = false;
     if(metric.first())
