@@ -1,7 +1,7 @@
 /*
  * This file is part of the xTuple ERP: PostBooks Edition, a free and
  * open source Enterprise Resource Planning software suite,
- * Copyright (c) 1999-2012 by OpenMFG LLC, d/b/a xTuple.
+ * Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
  * It is licensed to you under the Common Public Attribution License
  * version 1.0, the full text of which (including xTuple-specific Exhibits)
  * is available at www.xtuple.com/CPAL.  By using this software, you agree
@@ -618,11 +618,12 @@ void GUIClient::setWindowTitle()
                                .arg(_Version)
                                .arg(_GetWindowTitle.value("username").toString()) );
     else
-      QMainWindow::setWindowTitle( tr("%1 %2 - %3 on %4/%5 AS %6")
+      QMainWindow::setWindowTitle( tr("%1 %2 - %3 on %4:%5/%6 AS %7")
                                .arg(_Name)
                                .arg(_Version)
                                .arg(name)
                                .arg(server)
+                               .arg(port)
                                .arg(database)
                                .arg(_GetWindowTitle.value("username").toString()) );
   }

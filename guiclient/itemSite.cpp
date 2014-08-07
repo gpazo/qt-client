@@ -1,7 +1,7 @@
 /*
  * This file is part of the xTuple ERP: PostBooks Edition, a free and
  * open source Enterprise Resource Planning software suite,
- * Copyright (c) 1999-2012 by OpenMFG LLC, d/b/a xTuple.
+ * Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
  * It is licensed to you under the Common Public Attribution License
  * version 1.0, the full text of which (including xTuple-specific Exhibits)
  * is available at www.xtuple.com/CPAL.  By using this software, you agree
@@ -81,6 +81,7 @@ itemSite::itemSite(QWidget* parent, const char* name, bool modal, Qt::WFlags fl)
   _itemsiteid = -1;
   _itemType = 0;
   _qohCache = 0;
+  _costcatid = -1;
 
   _captive = FALSE;
   _updates = TRUE;
@@ -399,6 +400,13 @@ bool itemSite::sSave()
     }
   }
     
+  if ( (_mode == cEdit) && (_costcat->id() != _costcatid) && (_qohCache != 0) )
+  {
+    QMessageBox::warning( this, tr("Cannot Save Item Site"),
+                         tr("This Item Site has a quantity on hand and Cost Category cannot be changed.") );
+    return false;
+  }
+  
   if(_active->isChecked())
   {
     itemSave.prepare("SELECT item_id "
@@ -1377,6 +1385,7 @@ void itemSite::populate()
       _costJob->setChecked(true);
 
     _costcat->setId(itemsite.value("itemsite_costcat_id").toInt());
+    _costcatid = itemsite.value("itemsite_costcat_id").toInt();
     _plannerCode->setId(itemsite.value("itemsite_plancode_id").toInt());
 
     for (int pcounter = 0; pcounter < _planningType->count(); pcounter++)

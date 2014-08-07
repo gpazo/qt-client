@@ -1,7 +1,7 @@
 /*
  * This file is part of the xTuple ERP: PostBooks Edition, a free and
  * open source Enterprise Resource Planning software suite,
- * Copyright (c) 1999-2012 by OpenMFG LLC, d/b/a xTuple.
+ * Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
  * It is licensed to you under the Common Public Attribution License
  * version 1.0, the full text of which (including xTuple-specific Exhibits)
  * is available at www.xtuple.com/CPAL.  By using this software, you agree
@@ -40,6 +40,7 @@ issueToShipping::issueToShipping(QWidget* parent, const char* name, Qt::WFlags f
   connect(_bcFind,      SIGNAL(clicked()),                              this,         SLOT(sBcFind()));
   connect(_soitem,      SIGNAL(itemSelectionChanged()),                 this,         SLOT(sHandleButtons()));
   connect(_soitem,      SIGNAL(populateMenu(QMenu*,QTreeWidgetItem *)), this,         SLOT(sPopulateMenu(QMenu *)));
+  connect(_warehouse,   SIGNAL(newID(int)),                             this,         SLOT(sFillList()));
 
   _order->setAllowedStatuses(OrderLineEdit::Open);
   _order->setAllowedTypes(OrderLineEdit::Sales |
@@ -93,6 +94,12 @@ issueToShipping::issueToShipping(QWidget* parent, const char* name, Qt::WFlags f
 
   _bcQty->setValidator(omfgThis->qtyVal());
 
+  if (!_metrics->boolean("MultiWhs"))
+  {
+    _warehouseLit->hide();
+    _warehouse->hide();
+  }
+  
   if(_metrics->boolean("EnableSOReservations"))
   {
     _requireInventory->setChecked(true);
@@ -618,17 +625,13 @@ void issueToShipping::sReturnStock()
 void issueToShipping::sShip()
 {
   XSqlQuery issueShip;
-  issueShip.prepare( "SELECT shiphead_id "
-             "FROM shiphead JOIN shipitem ON (shipitem_shiphead_id=shiphead_id) "
-             "WHERE ((NOT shiphead_shipped)"
-             "  AND  (shiphead_order_type=:ordertype)"
-             "  AND  (shiphead_order_id=:order_id) ) "
-             "LIMIT 1;" );
+  issueShip.prepare( "SELECT getOpenShipmentId(:ordertype, :order_id, :warehous_id) AS shiphead_id;" );
   issueShip.bindValue(":order_id",  _order->id());
   issueShip.bindValue(":ordertype", _order->type());
+  issueShip.bindValue(":warehous_id", _warehouse->id());
 
   issueShip.exec();
-  if (issueShip.first())
+  if ( (issueShip.first()) && (issueShip.value("shiphead_id").toInt() > 0) )
   {
     // Reset _order so that lock is released prior to shipping and potentially auto receiving
     // to avoid locking conflicts
@@ -808,6 +811,7 @@ void issueToShipping::sFillList()
   }
 
   listp.append("ordertype", _order->type());
+  listp.append("warehous_id", _warehouse->id());
 
   if (_metrics->boolean("EnableSOReservationsByLocation"))
     listp.append("includeReservations");

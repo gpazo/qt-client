@@ -1,7 +1,7 @@
 /*
  * This file is part of the xTuple ERP: PostBooks Edition, a free and
  * open source Enterprise Resource Planning software suite,
- * Copyright (c) 1999-2012 by OpenMFG LLC, d/b/a xTuple.
+ * Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
  * It is licensed to you under the Common Public Attribution License
  * version 1.0, the full text of which (including xTuple-specific Exhibits)
  * is available at www.xtuple.com/CPAL.  By using this software, you agree
@@ -115,6 +115,7 @@ configureGL::configureGL(QWidget* parent, const char* name, bool /*modal*/, Qt::
   _hideApplyto->setChecked(_metrics->boolean("HideApplyToBalance"));
   _customerDeposits->setChecked(_metrics->boolean("EnableCustomerDeposits"));
   _discountTax->setChecked(_metrics->boolean("CreditTaxDiscount"));
+  _altCashExchangeRate->setChecked(_metrics->boolean("AltCashExchangeRate"));
 
   _name->setText(_metrics->value("remitto_name"));
   _address->setLine1(_metrics->value("remitto_address1"));
@@ -193,9 +194,12 @@ configureGL::configureGL(QWidget* parent, const char* name, bool /*modal*/, Qt::
 
   _mandatoryNotes->setChecked(_metrics->boolean("MandatoryGLEntryNotes"));
   _manualFwdUpdate->setChecked(_metrics->boolean("ManualForwardUpdate"));
+  
   _taxauth->setId(_metrics->value("DefaultTaxAuthority").toInt());
   // TODO hide default tax authority, not used?
-  _taxGroup->setVisible(FALSE);
+  _taxauthLit->setVisible(FALSE);
+  _taxauth->setVisible(FALSE);
+  _cashBasedTax->setChecked(_metrics->boolean("CashBasedTax"));
 
   _int2gl->setChecked(_metrics->boolean("InterfaceToGL"));
   _cacheint2gl = _int2gl->isChecked();
@@ -237,6 +241,36 @@ configureGL::configureGL(QWidget* parent, const char* name, bool /*modal*/, Qt::
     _useSubaccounts->setChecked(true);
     _cacheuseSubaccounts = true;
   }
+
+  // FC
+  
+  _annualInterestRate->setValidator(omfgThis->percentVal());
+  _financeChargeAccount->setType(GLCluster::cRevenue);
+  
+  _finchargid = -1;
+  XSqlQuery fcquery;
+  fcquery.exec("SELECT * FROM fincharg LIMIT 1;");
+  if(fcquery.first())
+  {
+    _finchargid = fcquery.value("fincharg_id").toInt();
+    _annualInterestRate->setDouble(fcquery.value("fincharg_air").toDouble());
+    _minFinanceCharge->setBaseValue(fcquery.value("fincharg_mincharg").toDouble());
+    _gracePeriod->setValue(fcquery.value("fincharg_graceperiod").toDouble());
+    if (fcquery.value("fincharg_calcfrom").toInt() == 1)
+    {
+      _dueDate->setChecked(true);
+    }
+    else
+    {
+      _invoiceDate->setChecked(true);
+    }
+    _assignOnOverdue->setChecked(fcquery.value("fincharg_assessoverdue").toBool());
+    _financeChargeLabel->setText(fcquery.value("fincharg_markoninvoice").toString());
+    _financeChargeAccount->setId(fcquery.value("fincharg_accnt_id").toInt());
+    _salesCat->setId(fcquery.value("fincharg_salescat_id").toInt());
+  }
+  else if (fcquery.lastError().type() != QSqlError::NoError)
+    systemError(this, fcquery.lastError().databaseText(), __FILE__, __LINE__);
   
   adjustSize();
 }
@@ -286,7 +320,7 @@ bool configureGL::sSave()
     if (configureSave.first())
     {
       QMessageBox::critical(this, tr("Cannot Save Accounting Configuration"),
-                            "You must assign G/L Accounts to all Cost Categories");
+                            "You must assign Ledger Accounts to all Cost Categories");
       return false;
     }
     if (_metrics->boolean("MultiWhs") && _metrics->boolean("Transforms"))
@@ -299,7 +333,7 @@ bool configureGL::sSave()
       if (configureSave.first())
       {
         QMessageBox::critical(this, tr("Cannot Save Accounting Configuration"),
-                              "You must assign a Transform Clearing G/L Account to all Cost Categories");
+                              "You must assign a Transform Clearing Ledger Account to all Cost Categories");
         return false;
       }
     }
@@ -313,7 +347,7 @@ bool configureGL::sSave()
       if (configureSave.first())
       {
         QMessageBox::critical(this, tr("Cannot Save Accounting Configuration"),
-                              "You must assign a Transfer Order Liability Clearing G/L Account to all Cost Categories");
+                              "You must assign a Transfer Order Liability Clearing Ledger Account to all Cost Categories");
         return false;
       }
     }
@@ -327,7 +361,7 @@ bool configureGL::sSave()
       if (configureSave.first())
       {
         QMessageBox::critical(this, tr("Cannot Save Accounting Configuration"),
-                              "You must assign a Labor and Overhead Costs G/L Account to all Cost Categories");
+                              "You must assign a Labor and Overhead Costs Ledger Account to all Cost Categories");
         return false;
       }
     }
@@ -349,7 +383,7 @@ bool configureGL::sSave()
     if (configureSave.first())
     {
       QMessageBox::critical(this, tr("Cannot Save Accounting Configuration"),
-                            "You must assign G/L Accounts to all Expense Categories");
+                            "You must assign Ledger Accounts to all Expense Categories");
       return false;
     }
     configureSave.exec("SELECT apaccnt_id "
@@ -364,7 +398,7 @@ bool configureGL::sSave()
     if (configureSave.first())
     {
       QMessageBox::critical(this, tr("Cannot Save Accounting Configuration"),
-                            "You must assign G/L Accounts to all Payables Assignments");
+                            "You must assign Ledger Accounts to all Payables Assignments");
       return false;
     }
   }
@@ -385,7 +419,7 @@ bool configureGL::sSave()
     if (configureSave.first())
     {
       QMessageBox::critical(this, tr("Cannot Save Accounting Configuration"),
-                            "You must assign G/L Accounts to all Receivables Assignments");
+                            "You must assign Ledger Accounts to all Receivables Assignments");
       return false;
     }
     if (_metrics->boolean("EnableCustomerDeposits"))
@@ -398,7 +432,7 @@ bool configureGL::sSave()
       if (configureSave.first())
       {
         QMessageBox::critical(this, tr("Cannot Save Accounting Configuration"),
-                              "You must assign a Deferred Revenue G/L Account to all Receivables Assignments");
+                              "You must assign a Deferred Revenue Ledger Account to all Receivables Assignments");
         return false;
       }
     }
@@ -414,7 +448,7 @@ bool configureGL::sSave()
     if (configureSave.first())
     {
       QMessageBox::critical(this, tr("Cannot Save Accounting Configuration"),
-                            "You must assign G/L Accounts to all Sales Assignments");
+                            "You must assign Ledger Accounts to all Sales Assignments");
       return false;
     }
     if (_metrics->boolean("EnableReturnAuth"))
@@ -431,7 +465,7 @@ bool configureGL::sSave()
       if (configureSave.first())
       {
         QMessageBox::critical(this, tr("Cannot Save Accounting Configuration"),
-                              "You must assign a Returns G/L Account to all Sales Assignments");
+                              "You must assign a Returns Ledger Account to all Sales Assignments");
         return false;
       }
     }
@@ -447,7 +481,7 @@ bool configureGL::sSave()
     if (configureSave.first())
     {
       QMessageBox::critical(this, tr("Cannot Save Accounting Configuration"),
-                            "You must assign G/L Accounts to all Sales Categories");
+                            "You must assign Ledger Accounts to all Sales Categories");
       return false;
     }
   }
@@ -526,7 +560,7 @@ bool configureGL::sSave()
       if (check.first())
       {
         QMessageBox::critical(this, tr("Cannot turn off Profit Centers"),
-                              "Turning off Profit Centers would result in duplicate G/L Accounts.");
+                              "Turning off Profit Centers would result in duplicate Ledger Accounts.");
         return false;
       }
     }
@@ -568,7 +602,7 @@ bool configureGL::sSave()
       if (check.first())
       {
         QMessageBox::critical(this, tr("Cannot turn off Subaccounts"),
-                              "Turning off Subaccounts would result in duplicate G/L Accounts.");
+                              "Turning off Subaccounts would result in duplicate Ledger Accounts.");
         return false;
       }
     }
@@ -589,7 +623,7 @@ bool configureGL::sSave()
     if (check.first())
     {
       QMessageBox::critical(this, tr("Cannot turn off Profit Centers and Subaccounts"),
-                            "Turning off both Profit Centers and Subaccounts would result in duplicate G/L Accounts.");
+                            "Turning off both Profit Centers and Subaccounts would result in duplicate Ledger Accounts.");
       return false;
     }
   }
@@ -671,6 +705,7 @@ bool configureGL::sSave()
   _metrics->set("HideApplyToBalance", _hideApplyto->isChecked());
   _metrics->set("EnableCustomerDeposits", _customerDeposits->isChecked());
   _metrics->set("CreditTaxDiscount", _discountTax->isChecked());
+  _metrics->set("AltCashExchangeRate", _altCashExchangeRate->isChecked());
 
   _metrics->set("remitto_name", 	_name->text().trimmed());
   _metrics->set("remitto_address1",	_address->line1().trimmed());
@@ -763,7 +798,9 @@ bool configureGL::sSave()
 
   _metrics->set("MandatoryGLEntryNotes", _mandatoryNotes->isChecked());
   _metrics->set("ManualForwardUpdate", _manualFwdUpdate->isChecked());
+  
   _metrics->set("DefaultTaxAuthority", _taxauth->id());
+  _metrics->set("CashBasedTax", _cashBasedTax->isChecked());
 
   _metrics->set("InterfaceToGL", _int2gl->isChecked());
   _metrics->set("InterfaceAPToGL", _intap2gl->isChecked());
@@ -792,6 +829,50 @@ bool configureGL::sSave()
                                "not be able to configure electronic "
                                "checking information for Vendors until the "
                                "system is configured to perform encryption."));
+  }
+
+  // FC
+  if (_financeChargeAccount->id() > 0)
+  {
+    XSqlQuery fcSave;
+    if (_finchargid > -1)
+      fcSave.prepare("UPDATE fincharg"
+                     "  SET fincharg_mincharg=:mincharg,"
+                     "      fincharg_graceperiod=:graceperiod,"
+                     "      fincharg_assessoverdue=:assessoverdue,"
+                     "      fincharg_calcfrom=:calcfrom,"
+                     "      fincharg_markoninvoice=:markoninvoice,"
+                     "      fincharg_air=:air,"
+                     "      fincharg_accnt_id=:glaccnt,"
+                     "      fincharg_salescat_id=:salescat "
+                     "WHERE (fincharg_id=:finchargid);");
+    else
+      fcSave.prepare("INSERT INTO fincharg"
+                     "  (fincharg_id, fincharg_mincharg, fincharg_graceperiod,"
+                     "   fincharg_assessoverdue, fincharg_calcfrom, fincharg_markoninvoice,"
+                     "   fincharg_air, fincharg_accnt_id, fincharg_salescat_id) "
+                     "VALUES"
+                     "  (1, :mincharg, :graceperiod,"
+                     "   :assessoverdue, :calcfrom, :markoninvoice,"
+                     "   :air, :glaccnt, :salescat);");
+    fcSave.bindValue(":mincharg", _minFinanceCharge->baseValue());
+    fcSave.bindValue(":graceperiod", _gracePeriod->value());
+    fcSave.bindValue(":assessoverdue", _assignOnOverdue->isChecked());
+    if (_dueDate->isChecked())
+      fcSave.bindValue(":calcfrom", 1);
+    else
+      fcSave.bindValue(":calcfrom", 2);
+    fcSave.bindValue(":markoninvoice", _financeChargeLabel->text());
+    fcSave.bindValue(":air", _annualInterestRate->toDouble());
+    fcSave.bindValue(":glaccnt", _financeChargeAccount->id());
+    fcSave.bindValue(":salescat", _salesCat->id());
+    fcSave.bindValue(":finchargid", _finchargid);
+    fcSave.exec();
+    if (fcSave.lastError().type() != QSqlError::NoError)
+    {
+      systemError(this, fcSave.lastError().databaseText(), __FILE__, __LINE__);
+      return false;
+    }
   }
 
   return true;

@@ -1,7 +1,7 @@
 /*
  * This file is part of the xTuple ERP: PostBooks Edition, a free and
  * open source Enterprise Resource Planning software suite,
- * Copyright (c) 1999-2012 by OpenMFG LLC, d/b/a xTuple.
+ * Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
  * It is licensed to you under the Common Public Attribution License
  * version 1.0, the full text of which (including xTuple-specific Exhibits)
  * is available at www.xtuple.com/CPAL.  By using this software, you agree
@@ -126,6 +126,7 @@ purchaseOrder::purchaseOrder(QWidget* parent, const char* name, Qt::WFlags fl)
   _captive         = false;
   _userOrderNumber = false;
   _printed         = false;
+  _locked          = false;
   _NumberGen       = -1;
 
   setPoheadid(-1);
@@ -531,6 +532,7 @@ void purchaseOrder::setViewMode()
   _vendCntct->setEnabled(FALSE);
   _vendAddr->setEnabled(FALSE);
   _shiptoCntct->setEnabled(FALSE);
+  _shiptoName->setEnabled(FALSE);
   _shiptoAddr->setEnabled(FALSE);
   _shipVia->setEnabled(FALSE);
   _fob->setEnabled(FALSE);
@@ -616,11 +618,59 @@ void purchaseOrder::createHeader()
 
   // Populate Ship To contact and addresses for the Receiving Site
   sHandleShipTo();
+
+  if (!_locked)
+  {
+    purchasecreateHeader.prepare("SELECT tryLock(oid::integer, :head_id) AS locked "
+                                 "FROM pg_class "
+                                 "WHERE relname=:table;");
+    purchasecreateHeader.bindValue(":head_id", _poheadid);
+    purchasecreateHeader.bindValue(":table", "pohead");
+    purchasecreateHeader.exec();
+    if (purchasecreateHeader.first())
+      _locked = purchasecreateHeader.value("locked").toBool();
+    else if (purchasecreateHeader.lastError().type() != QSqlError::NoError)
+    {
+      systemError(this, purchasecreateHeader.lastError().databaseText(), __FILE__, __LINE__);
+      return;
+    }
+  }
 }
 
 void purchaseOrder::populate()
 {
   XSqlQuery po;
+
+  if (_mode == cEdit && !_locked)
+  {
+    // Lock the record
+    po.prepare("SELECT tryLock(oid::integer, :head_id) AS locked "
+               "FROM pg_class "
+               "WHERE relname=:table;");
+    po.bindValue(":head_id", _poheadid);
+    po.bindValue(":table", "pohead");
+    po.exec();
+    if (po.first())
+    {
+      if (po.value("locked").toBool() != true)
+      {
+        QMessageBox::critical( this, tr("Record Currently Being Edited"),
+                              tr("<p>The record you are trying to edit is currently being edited "
+                                 "by another user. Continue in View Mode.") );
+        setViewMode();
+      }
+      else
+        _locked = true;
+    }
+    else
+    {
+      QMessageBox::critical( this, tr("Cannot Lock Record for Editing"),
+                            tr("<p>There was an unexpected error while trying to lock the record "
+                               "for editing. Please report this to your administator.") );
+      setViewMode();
+    }
+  }
+  
   po.prepare( "SELECT pohead.*, COALESCE(pohead_warehous_id, -1) AS warehous_id,"
                           "       COALESCE(pohead_cohead_id, -1) AS cohead_id,"
               "       CASE WHEN (pohead_status='U') THEN 0"
@@ -705,6 +755,8 @@ void purchaseOrder::populate()
     _vendAddr->setPostalCode(po.value("pohead_vendzipcode").toString());
     _vendAddr->setCountry(po.value("pohead_vendcountry").toString());
         connect(_vendAddr, SIGNAL(changed()), _vendaddrCode, SLOT(clear()));
+
+    _shiptoName->setText(po.value("pohead_shiptoname").toString());
 
     _shiptoAddr->setId(po.value("pohead_shiptoaddress_id").toInt());
     _shiptoAddr->setLine1(po.value("pohead_shiptoaddress1").toString());
@@ -814,6 +866,7 @@ void purchaseOrder::sSave()
              "    pohead_shipto_cntct_title=:pohead_shipto_cntct_title,"
              "    pohead_shipto_cntct_fax=:pohead_shipto_cntct_fax,"
              "    pohead_shipto_cntct_email=:pohead_shipto_cntct_email,"
+             "    pohead_shiptoname=:pohead_shiptoname,"
              "    pohead_shiptoaddress_id=:pohead_shiptoaddress_id,"
              "    pohead_shiptoaddress1=:pohead_shiptoaddress1,"
              "    pohead_shiptoaddress2=:pohead_shiptoaddress2,"
@@ -867,6 +920,7 @@ void purchaseOrder::sSave()
   purchaseSave.bindValue(":pohead_shipto_cntct_title", _shiptoCntct->title());
   purchaseSave.bindValue(":pohead_shipto_cntct_fax", _shiptoCntct->fax());
   purchaseSave.bindValue(":pohead_shipto_cntct_email", _shiptoCntct->emailAddress());
+  purchaseSave.bindValue(":pohead_shiptoname", _shiptoName->text());
   if (_shiptoAddr->isValid())
     purchaseSave.bindValue(":pohead_shiptoaddress_id", _shiptoAddr->id());
   purchaseSave.bindValue(":pohead_shiptoaddress1", _shiptoAddr->line1());
@@ -913,6 +967,24 @@ void purchaseOrder::sSave()
 
   emit saved(_poheadid);
 
+  XSqlQuery clearq;
+  if (_locked)
+  {
+    clearq.prepare("SELECT pg_advisory_unlock(oid::integer, :head_id) AS result "
+                   "FROM pg_class "
+                   "WHERE relname=:table;");
+    clearq.bindValue(":head_id", _poheadid);
+    clearq.bindValue(":table", "pohead");
+    clearq.exec();
+    if (clearq.first() && !clearq.value("result").toBool())
+      systemError(this, tr("Could not release this Purchase Order record."),
+                  __FILE__, __LINE__);
+    else if (clearq.lastError().type() != QSqlError::NoError)
+      systemError(this, clearq.lastError().databaseText(), __FILE__, __LINE__);
+    else
+      _locked=false;
+  }
+  
   if (_mode == cNew && !_captive)
   {
     _purchaseOrderInformation->setCurrentIndex(0);
@@ -940,6 +1012,7 @@ void purchaseOrder::sSave()
     _vendCntct->clear();
     _vendAddr->clear();
     _shiptoCntct->clear();
+    _shiptoName->clear();
     _shiptoAddr->clear();
 
     createHeader();
@@ -1372,6 +1445,23 @@ void purchaseOrder::sHandleOrderNumber()
       if (purchaseHandleOrderNumber.lastError().type() != QSqlError::NoError)
         systemError(this, purchaseHandleOrderNumber.lastError().databaseText(), __FILE__, __LINE__);
 
+      if (_locked)
+      {
+        purchaseHandleOrderNumber.prepare("SELECT pg_advisory_unlock(oid::integer, :head_id) AS result "
+                                          "FROM pg_class "
+                                          "WHERE relname=:table;");
+        purchaseHandleOrderNumber.bindValue(":head_id", _poheadid);
+        purchaseHandleOrderNumber.bindValue(":table", "pohead");
+        purchaseHandleOrderNumber.exec();
+        if (purchaseHandleOrderNumber.first() && !purchaseHandleOrderNumber.value("result").toBool())
+          systemError(this, tr("Could not release this Purchase Order record."),
+                      __FILE__, __LINE__);
+        else if (purchaseHandleOrderNumber.lastError().type() != QSqlError::NoError)
+          systemError(this, purchaseHandleOrderNumber.lastError().databaseText(), __FILE__, __LINE__);
+        else
+          _locked=false;
+      }
+      
       _mode = cEdit;
       setPoheadid(poheadid);
       populate();
@@ -1475,6 +1565,24 @@ void purchaseOrder::closeEvent(QCloseEvent *pEvent)
     }
   }
 
+  XSqlQuery clearq;
+  if (_locked)
+  {
+    clearq.prepare("SELECT pg_advisory_unlock(oid::integer, :head_id) AS result "
+                   "FROM pg_class "
+                   "WHERE relname=:table;");
+    clearq.bindValue(":head_id", _poheadid);
+    clearq.bindValue(":table", "pohead");
+    clearq.exec();
+    if (clearq.first() && !clearq.value("result").toBool())
+      systemError(this, tr("Could not release this Purchase Order record."),
+                  __FILE__, __LINE__);
+    else if (clearq.lastError().type() != QSqlError::NoError)
+      systemError(this, clearq.lastError().databaseText(), __FILE__, __LINE__);
+    else
+      _locked=false;
+  }
+  
   XWidget::closeEvent(pEvent);
 }
 

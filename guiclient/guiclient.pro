@@ -20,19 +20,42 @@ win32-msvc* {
                     ../lib/xtuplescriptapi.lib \
                     ../lib/xtuplewidgets.lib
 } else {
-  PRE_TARGETDEPS += ../lib/libxtuplecommon.a    \
-                    ../lib/libxtuplescriptapi.a \
-                    ../lib/libxtuplewidgets.a   \
-                    ../$${OPENRPT_BLD}/lib/libMetaSQL.a  \
-                    ../$${OPENRPT_BLD}/lib/librenderer.a \
-                    ../$${OPENRPT_BLD}/lib/libwrtembed.a \
-                    ../$${OPENRPT_BLD}/lib/libDmtx_Library.a \
-                    ../$${OPENRPT_BLD}/lib/libcommon.a
+  xtcommon_shared {
+    PRE_TARGETDEPS += ../lib/libxtuplecommon.so
+  } else {
+    PRE_TARGETDEPS += ../lib/libxtuplecommon.a
+  }
+  PRE_TARGETDEPS += ../lib/libxtuplescriptapi.a \
+                    ../lib/libxtuplewidgets.a
+  openrpt_shared {
+    PRE_TARGETDEPS += $${OPENRPT_BLD}/libMetaSQL.so  \
+                      $${OPENRPT_BLD}/librenderer.so \
+                      $${OPENRPT_BLD}/libwrtembed.so \
+                      $${OPENRPT_BLD}/libdmtx.so \
+                      $${OPENRPT_BLD}/libcommon.so
+  } else {
+    PRE_TARGETDEPS += $${OPENRPT_BLD}/lib/libMetaSQL.a  \
+                      $${OPENRPT_BLD}/lib/librenderer.a \
+                      $${OPENRPT_BLD}/lib/libwrtembed.a \
+                      $${OPENRPT_BLD}/lib/libDmtx_Library.a \
+                      $${OPENRPT_BLD}/lib/libcommon.a
+  }
 }
 
-LIBS        += -L../lib -L../$${OPENRPT_BLD}/lib \
-               -lxtuplecommon -lxtuplewidgets -lwrtembed -lcommon -lrenderer \
-               -lxtuplescriptapi -lDmtx_Library -lMetaSQL
+QMAKE_LIBDIR = ../lib $${OPENRPT_BLD}/lib $${OPENRPT_BLD} $$QMAKE_LIBDIR
+LIBS        += -lxtuplecommon -lxtuplewidgets -lwrtembed 
+openrpt_shared {
+  LIBS      += -lopenrptcommon
+} else {
+  LIBS      += -lcommon
+}
+LIBS        += -lrenderer -lxtuplescriptapi 
+openrpt_shared {
+  LIBS      += -ldmtx
+} else {
+  LIBS      += -lDmtx_Library
+}
+LIBS        += -lMetaSQL
 
 #not the best way to handle this, but it should do
 mac:!static:contains(QT_CONFIG, qt_framework) {
@@ -97,6 +120,7 @@ FORMS =   absoluteCalendarItem.ui               \
           arOpenItem.ui                         \
           arWorkBench.ui                        \
           archRestoreSalesHistory.ui            \
+          assessFinanceCharges.ui               \
           assignClassCodeToPlannerCode.ui       \
           assignItemToPlannerCode.ui            \
           assignLotSerial.ui                    \
@@ -552,6 +576,7 @@ FORMS =   absoluteCalendarItem.ui               \
           todoItem.ui                           \
           todoList.ui                           \
           todoListCalendar.ui                   \
+          toggleBankrecCleared.ui               \
           transactionInformation.ui             \
           transferOrder.ui                      \
           transferOrderItem.ui                  \
@@ -646,6 +671,7 @@ HEADERS = ../common/format.h                    \
           arOpenItem.h                          \
           arWorkBench.h                         \
           archRestoreSalesHistory.h             \
+          assessFinanceCharges.h                \
           assignClassCodeToPlannerCode.h        \
           assignItemToPlannerCode.h             \
           assignLotSerial.h                     \
@@ -1145,6 +1171,7 @@ HEADERS = ../common/format.h                    \
           todoItem.h                    \
           todoList.h                    \
           todoListCalendar.h            \
+          toggleBankrecCleared.h        \
           toitemTableModel.h            \
           toitemTableView.h             \
           transactionInformation.h      \
@@ -1254,6 +1281,7 @@ SOURCES = absoluteCalendarItem.cpp              \
           arOpenItem.cpp                        \
           arWorkBench.cpp                       \
           archRestoreSalesHistory.cpp           \
+          assessFinanceCharges.cpp              \
           assignClassCodeToPlannerCode.cpp      \
           assignItemToPlannerCode.cpp           \
           assignLotSerial.cpp                   \
@@ -1752,6 +1780,7 @@ SOURCES = absoluteCalendarItem.cpp              \
           todoItem.cpp                          \
           todoList.cpp                          \
           todoListCalendar.cpp                  \
+          toggleBankrecCleared.cpp              \
           toitemTableModel.cpp                  \
           toitemTableView.cpp                   \
           transactionInformation.cpp            \
@@ -1838,7 +1867,7 @@ include( hunspell.pri )
 QT += xml sql script scripttools network
 QT += webkit xmlpatterns
 
-RESOURCES += guiclient.qrc ../$${OPENRPT_DIR}/OpenRPT/images/OpenRPTMetaSQL.qrc
+RESOURCES += guiclient.qrc $$OPENRPT_IMAGE_DIR/OpenRPTMetaSQL.qrc
 
 #CONFIG += debug
 

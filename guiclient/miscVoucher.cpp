@@ -1,7 +1,7 @@
 /*
  * This file is part of the xTuple ERP: PostBooks Edition, a free and
  * open source Enterprise Resource Planning software suite,
- * Copyright (c) 1999-2012 by OpenMFG LLC, d/b/a xTuple.
+ * Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
  * It is licensed to you under the Common Public Attribution License
  * version 1.0, the full text of which (including xTuple-specific Exhibits)
  * is available at www.xtuple.com/CPAL.  By using this software, you agree
@@ -71,10 +71,6 @@ enum SetResponse miscVoucher::set(const ParameterList &pParams)
   XWidget::set(pParams);
   QVariant param;
   bool     valid;
-
-  param = pParams.value("vend_id", &valid);
-  if (valid)
-    _vendor->setId(param.toInt());
 
   param = pParams.value("mode", &valid);
   if (valid)
@@ -148,6 +144,10 @@ enum SetResponse miscVoucher::set(const ParameterList &pParams)
     }
   }
 
+  param = pParams.value("vend_id", &valid);
+  if (valid)
+    _vendor->setId(param.toInt());
+  
   param = pParams.value("vohead_id", &valid);
   if (valid)
   {

@@ -1,7 +1,7 @@
 /*
  * This file is part of the xTuple ERP: PostBooks Edition, a free and
  * open source Enterprise Resource Planning software suite,
- * Copyright (c) 1999-2012 by OpenMFG LLC, d/b/a xTuple.
+ * Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
  * It is licensed to you under the Common Public Attribution License
  * version 1.0, the full text of which (including xTuple-specific Exhibits)
  * is available at www.xtuple.com/CPAL.  By using this software, you agree
@@ -132,7 +132,7 @@ void salesAccount::sSave()
     errors << GuiErrorCheck(!_sales->isValid(), _sales,
                             tr("<p>You must select a Sales Account for this Assignment."))
            << GuiErrorCheck(!_credit->isValid(), _credit,
-                            tr("<p>You must select a Credit Memo Account for this Assignment."))
+                            tr("<p>You must select a Return Account for this Assignment."))
            << GuiErrorCheck(!_cos->isValid(), _cos,
                             tr("<p>You must select a Cost of Sales Account for this Assignment."))
            << GuiErrorCheck(_metrics->boolean("EnableReturnAuth") && !_returns->isValid(), _returns,
