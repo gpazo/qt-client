@@ -15,14 +15,16 @@ INCLUDEPATH += ../scriptapi \
 
 DEPENDPATH  += $${INCLUDEPATH}
 
-win32-msvc* {
+win32 {
   PRE_TARGETDEPS += ../lib/xtuplecommon.$${XTLIBEXT}    \
-                    ../lib/xtuplescriptapi.lib          \
-                    ../lib/xtuplewidgets.lib            \
                     $${OPENRPT_LIBDIR}/MetaSQL.$${OPENRPTLIBEXT}  \
                     $${OPENRPT_LIBDIR}/renderer.$${OPENRPTLIBEXT} \
                     $${OPENRPT_LIBDIR}/wrtembed.$${OPENRPTLIBEXT} \
                     $${OPENRPT_LIBDIR}/openrptcommon.$${OPENRPTLIBEXT}
+  win32-msvc*:PRE_TARGETDEPS += ../lib/xtuplescriptapi.lib \
+                      ../lib/xtuplewidgets.lib
+  win32-g++*:PRE_TARGETDEPS += ../lib/libxtuplescriptapi.a    \
+                               ../lib/libxtuplewidgets.a
 } else {
   PRE_TARGETDEPS += ../lib/libxtuplecommon.$${XTLIBEXT} \
                     ../lib/libxtuplescriptapi.a         \
