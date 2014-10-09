@@ -386,7 +386,7 @@ to be bound by its terms.</comment>
    <item>
     <widget class="QTabWidget" name="_salesOrderInformation">
      <property name="currentIndex">
-      <number>0</number>
+      <number>7</number>
      </property>
      <widget class="QWidget" name="_headerPage">
       <attribute name="title">
@@ -1858,7 +1858,7 @@ to be bound by its terms.</comment>
        <item>
         <widget class="QTabWidget" name="_paymentInformation">
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="_creditCardPage">
           <attribute name="title">
@@ -1885,38 +1885,24 @@ to be bound by its terms.</comment>
                <property name="verticalSpacing">
                 <number>0</number>
                </property>
-               <item row="0" column="0">
-                <widget class="QPushButton" name="_newCC">
-                 <property name="text">
-                  <string>New</string>
+               <item row="8" column="1">
+                <spacer>
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
                  </property>
-                </widget>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Expanding</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>41</height>
+                  </size>
+                 </property>
+                </spacer>
                </item>
-               <item row="1" column="0">
-                <widget class="QPushButton" name="_editCC">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="text">
-                  <string>Edit</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="0">
-                <widget class="QPushButton" name="_viewCC">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="focusPolicy">
-                  <enum>Qt::NoFocus</enum>
-                 </property>
-                 <property name="text">
-                  <string>View</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="0">
-                <widget class="QPushButton" name="_upCC">
+               <item row="7" column="1">
+                <widget class="QPushButton" name="_charge">
                  <property name="enabled">
                   <bool>false</bool>
                  </property>
@@ -1924,12 +1910,12 @@ to be bound by its terms.</comment>
                   <enum>Qt::NoFocus</enum>
                  </property>
                  <property name="text">
-                  <string>Move Up</string>
+                  <string>Charge</string>
                  </property>
                 </widget>
                </item>
-               <item row="4" column="0">
-                <widget class="QPushButton" name="_downCC">
+               <item row="6" column="1">
+                <widget class="QPushButton" name="_authorize">
                  <property name="enabled">
                   <bool>false</bool>
                  </property>
@@ -1937,11 +1923,11 @@ to be bound by its terms.</comment>
                   <enum>Qt::NoFocus</enum>
                  </property>
                  <property name="text">
-                  <string>Move Down</string>
+                  <string>Authorize</string>
                  </property>
                 </widget>
                </item>
-               <item row="5" column="0">
+               <item row="5" column="1">
                 <spacer>
                  <property name="orientation">
                   <enum>Qt::Vertical</enum>
@@ -1957,8 +1943,8 @@ to be bound by its terms.</comment>
                  </property>
                 </spacer>
                </item>
-               <item row="6" column="0">
-                <widget class="QPushButton" name="_authorize">
+               <item row="4" column="1">
+                <widget class="QPushButton" name="_downCC">
                  <property name="enabled">
                   <bool>false</bool>
                  </property>
@@ -1966,12 +1952,12 @@ to be bound by its terms.</comment>
                   <enum>Qt::NoFocus</enum>
                  </property>
                  <property name="text">
-                  <string>Authorize</string>
+                  <string>Move Down</string>
                  </property>
                 </widget>
                </item>
-               <item row="7" column="0">
-                <widget class="QPushButton" name="_charge">
+               <item row="3" column="1">
+                <widget class="QPushButton" name="_upCC">
                  <property name="enabled">
                   <bool>false</bool>
                  </property>
@@ -1979,25 +1965,46 @@ to be bound by its terms.</comment>
                   <enum>Qt::NoFocus</enum>
                  </property>
                  <property name="text">
-                  <string>Charge</string>
+                  <string>Move Up</string>
                  </property>
                 </widget>
                </item>
-               <item row="8" column="0">
-                <spacer>
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
+               <item row="2" column="1">
+                <widget class="QPushButton" name="_viewCC">
+                 <property name="enabled">
+                  <bool>false</bool>
                  </property>
-                 <property name="sizeType">
-                  <enum>QSizePolicy::Expanding</enum>
+                 <property name="focusPolicy">
+                  <enum>Qt::NoFocus</enum>
                  </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>41</height>
-                  </size>
+                 <property name="text">
+                  <string>View</string>
                  </property>
-                </spacer>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QPushButton" name="_editCC">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="text">
+                  <string>Edit</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QPushButton" name="_newCC">
+                 <property name="text">
+                  <string>New</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="9" column="1">
+                <widget class="QPushButton" name="_sigCC">
+                 <property name="text">
+                  <string>Signature</string>
+                 </property>
+                </widget>
                </item>
               </layout>
              </item>

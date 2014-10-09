@@ -19,6 +19,9 @@
 #include <QSqlError>
 #include <QValidator>
 #include <QVariant>
+#include <QDesktopServices>
+#include <QUrl>
+#include <QDebug>
 
 #include <metasql.h>
 
@@ -106,6 +109,7 @@ salesOrder::salesOrder(QWidget *parent, const char *name, Qt::WFlags fl)
   connect(_editCC,              SIGNAL(clicked()),                              this,         SLOT(sEditCreditCard()));
   connect(_new,                 SIGNAL(clicked()),                              this,         SLOT(sNew()));
   connect(_newCC,               SIGNAL(clicked()),                              this,         SLOT(sNewCreditCard()));
+  connect(_sigCC,               SIGNAL(clicked()),                              this,         SLOT(sNewSignatureCapture()));
   //connect(_newCust,             SIGNAL(clicked()),                              this,         SLOT(sNewCust()));
   connect(_orderNumber,         SIGNAL(editingFinished()),                            this,         SLOT(sHandleOrderNumber()));
   connect(_orderNumber,         SIGNAL(textChanged(const QString &)),           this,         SLOT(sSetUserEnteredOrderNumber()));
@@ -3895,6 +3899,48 @@ void salesOrder::sNewCreditCard()
 
   if (newdlg.exec() != XDialog::Rejected)
     sFillCcardList();
+}
+
+void salesOrder::sNewSignatureCapture()
+{
+    XSqlQuery mobile;
+    mobile.exec("SELECT EXISTS(SELECT 1 FROM pg_namespace WHERE nspname = 'xm') AS isMobile;");
+    bool isMobile = false;
+    if(mobile.first())
+      isMobile = mobile.value("isMobile").toBool();
+    else if (mobile.lastError().type() != QSqlError::NoError)
+    {
+      systemError(this, mobile.lastError().databaseText(), __FILE__, __LINE__);
+      return;
+    }
+
+    if(isMobile)
+    {
+        QSqlDatabase db = QSqlDatabase::database();
+        QString databaseName = db.databaseName();
+        XSqlQuery metric;
+        metric.exec("SELECT fetchMetricText('WebappHostname') as hostname,"
+                    "       fetchMetricText('WebappPort') as port; ");
+        QString hostName, port;
+         if(metric.first())
+         {
+             hostName = metric.value("hostname").toString();
+             port = metric.value("port").toString();
+         }
+         else if (metric.lastError().type() != QSqlError::NoError)
+         {
+           systemError(this, metric.lastError().databaseText(), __FILE__, __LINE__);
+           return;
+         }
+         QString URL = "http://"+ hostName +":"+port+"/"+databaseName+"/app#workspace/sales-order/"+_orderNumber->text() + "/popup-signature";
+         qDebug () << "URL = " << URL;
+         qDebug () << "webappPort = " << port;
+         QDesktopServices::openUrl(QUrl(URL));
+    }
+    else
+    {
+        //call wally dawg
+    }
 }
 
 void salesOrder::sEditCreditCard()

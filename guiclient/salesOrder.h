@@ -75,6 +75,7 @@ class salesOrder : public XWidget, public Ui::salesOrder
     virtual void        populateCMInfo();
     virtual void        populateCCInfo();
     virtual void        sNewCreditCard();
+    virtual void        sNewSignatureCapture();
     virtual void        sEditCreditCard();
     virtual void        sViewCreditCard();
     virtual void        sMoveUp();
