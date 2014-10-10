@@ -3903,6 +3903,7 @@ void salesOrder::sNewCreditCard()
 
 void salesOrder::sNewSignatureCapture()
 {
+    sSave(); //save the sales order to prevent record locking conflict
     XSqlQuery mobile;
     mobile.exec("SELECT EXISTS(SELECT 1 FROM pg_namespace WHERE nspname = 'xm') AS isMobile;");
     bool isMobile = false;
@@ -3932,7 +3933,7 @@ void salesOrder::sNewSignatureCapture()
            systemError(this, metric.lastError().databaseText(), __FILE__, __LINE__);
            return;
          }
-         QString URL = "http://"+ hostName +":"+port+"/"+databaseName+"/app#workspace/sales-order/"+_orderNumber->text() + "/popup-signature";
+         QString URL = "https://"+ hostName +":"+port+"/"+databaseName+"/app#workspace/sales-order/"+_orderNumber->text() + "/popup-signature";
          qDebug () << "URL = " << URL;
          qDebug () << "webappPort = " << port;
          QDesktopServices::openUrl(QUrl(URL));
