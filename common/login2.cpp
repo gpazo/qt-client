@@ -23,6 +23,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QVariant>
+#include <QDebug>
 
 #include "dbtools.h"
 #include "login2Options.h"
@@ -334,6 +335,63 @@ void login2::sLogin()
     if (db.open())
       break;  // break instead of for-loop condition to preserve methodidx
   }
+  // Check that it is a supported PostgreSQL version
+   if (db.isOpen())
+   {
+     XSqlQuery checkVersion;
+     checkVersion.prepare("SELECT setting AS version FROM pg_settings WHERE name='server_version'");
+     checkVersion.exec();
+     bool goodVersion = false;
+     // FIXME:
+     // - should store the range in some constants
+     // - when version numbers use extra digits (e.g v10.1), must use a
+     //   version comparison algorithm
+     if(checkVersion.first())
+     {
+       QString pg_version = checkVersion.value("version").toString();
+       QStringList version = pg_version.split('.'); //TODO: make this more comprehensive on version checking
+       QString actual = version[0] +'.'+ version[1];
+       if(!(actual < "8.4" ||
+            actual > "9.4"))
+       {
+         goodVersion = true;
+       }
+     }
+     else if (checkVersion.lastError().type() != QSqlError::NoError)
+     {
+       if (_splash)
+         _splash->hide();
+       QMessageBox::critical(this, tr("System Error"),
+                             tr("A System Error occurred at %1::%2:\n%3")
+                               .arg(__FILE__).arg(__LINE__)
+                               .arg(checkVersion.lastError().databaseText()));
+     }
+     if(!goodVersion)
+     {
+       if (_splash)
+         _splash->hide();
+
+       setCursor(QCursor(Qt::ArrowCursor));
+
+       QMessageBox::critical(this, tr("Cannot Connect to xTuple ERP Server"),
+                             tr("<p>Sorry, can't connect to the specified xTuple ERP server. "
+                              "<p>The server version %1 is not supported."
+                              "<p>The minimum supported version is %2 and maximum is %3.")
+                              .arg(checkVersion.value("version").toString())
+                              .arg("8.4").arg("9.4"));
+       db.close();
+       if (!_captive)
+       {
+        _username->setText("");
+         _username->setFocus();
+       }
+       else
+        _password->setFocus();
+
+       _password->setText("");
+       return;
+     }
+   }
 
    // if connected using OpenMFG enhanced auth, remangle the password
 
