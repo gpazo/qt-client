@@ -21,7 +21,6 @@
 #include <QVariant>
 #include <QDesktopServices>
 #include <QUrl>
-#include <QDebug>
 
 #include <metasql.h>
 
@@ -3842,7 +3841,6 @@ void salesOrder::sNewCreditCard()
 
 void salesOrder::sNewSignatureCapture()
 {
-    sSave(); //save the sales order to prevent record locking conflict
     XSqlQuery mobile;
     mobile.exec("SELECT EXISTS(SELECT 1 FROM pg_namespace WHERE nspname = 'xm') AS isMobile;");
     bool isMobile = false;
@@ -3856,6 +3854,7 @@ void salesOrder::sNewSignatureCapture()
 
     if(isMobile)
     {
+        sSave(); //save the sales order to prevent record locking conflict
         QSqlDatabase db = QSqlDatabase::database();
         QString databaseName = db.databaseName();
         XSqlQuery metric;
@@ -3873,13 +3872,11 @@ void salesOrder::sNewSignatureCapture()
            return;
          }
          QString URL = "https://"+ hostName +":"+port+"/"+databaseName+"/app#workspace/sales-order/"+_orderNumber->text() + "/popup-signature";
-         qDebug () << "URL = " << URL;
-         qDebug () << "webappPort = " << port;
          QDesktopServices::openUrl(QUrl(URL));
     }
     else
     {
-        //call wally dawg
+        QMessageBox::information(this, tr("Non-mobile database"),tr("You will need a web-enabled database in order to use this feature. Please contact your xTuple representative for more information."));
     }
 }
 
