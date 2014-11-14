@@ -14,7 +14,7 @@
 #include "parameter.h"
 
 #include <QString>
-#include <QAction>
+#include <QtWidgets/QAction>
 
 class XSqlQuery;
 

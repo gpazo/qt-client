@@ -310,4 +310,4 @@ FORMS += alarmMaint.ui \
 
 RESOURCES += widgets.qrc
 
-QT +=  sql script
+QT +=  sql script widgets

@@ -161,7 +161,7 @@ void ContactWidget::init()
     _webaddr->setPalette(p);
     
     QFont newFont = _email->font();
-    newFont.setUnderline(TRUE);
+    newFont.setUnderline(true);
     emailEdit->setFont(newFont);
     _webaddr->setFont(newFont);
 
@@ -1080,7 +1080,7 @@ void ContactWidget::sLaunchWebaddr()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ContactList::ContactList(QWidget* pParent, const char* pName, bool, Qt::WFlags) 
+ContactList::ContactList(QWidget* pParent, const char* pName, bool, Qt::WindowFlags)
   : VirtualList(pParent, 0)
 {
   setAttribute(Qt::WA_DeleteOnClose);
@@ -1428,7 +1428,7 @@ void ContactWidget::sEditEmailList()
   ParameterList params;
   params.append("cntct_id", _id);
 
-  contactEmail newdlg(this, "", TRUE);
+  contactEmail newdlg(this, "", true);
   newdlg.set(params);
   int selected = newdlg.exec();
   fillEmail();

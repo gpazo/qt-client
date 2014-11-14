@@ -11,7 +11,7 @@
 #ifndef xcombobox_h
 #define xcombobox_h
 
-#include <QComboBox>
+#include <QtWidgets/QComboBox>
 
 #include "guiclientinterface.h"
 #include "widgets.h"

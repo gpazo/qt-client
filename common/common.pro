@@ -2,7 +2,7 @@ include( ../global.pri )
 
 TARGET      = xtuplecommon
 TEMPLATE    = lib
-CONFIG      += qt warn_on dll
+CONFIG     += qt warn_on dll
 # TEMPORARY HACK
 win32 {
   CONFIG -= dll
@@ -70,6 +70,6 @@ HEADERS = applock.h              \
 
 FORMS = login2.ui login2Options.ui checkForUpdates.ui
 
-QT +=  script sql xml xmlpatterns network
+QT +=  script sql xml xmlpatterns network widgets
 
 RESOURCES += xTupleCommon.qrc

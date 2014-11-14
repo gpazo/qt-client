@@ -35,6 +35,8 @@ class QMdiArea;
 class Privileges;
 class QWidget;
 
+Q_PLUGIN_METADATA(IID "org.xtuple.Plugin.xTuplePlugin")
+
 extern Preferences *_x_preferences;
 extern Metrics     *_x_metrics;
 extern QMdiArea    *_x_workspace;

@@ -325,7 +325,7 @@ void OrderLineEdit::sParse()
 
     if (! _parsed)
     {
-      _parsed = TRUE;
+      _parsed = true;
       QString stripped = text().trimmed().toUpper();
       if (stripped.length() == 0)
       {
@@ -883,7 +883,7 @@ void OrderLineEdit::silentSetId(const int pId)
     _idColName="orderhead_id";
   }
 
-  _parsed = TRUE;
+  _parsed = true;
   emit parsed();
 }
 

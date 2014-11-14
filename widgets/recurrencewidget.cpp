@@ -937,7 +937,7 @@ QScriptValue constructRecurrenceWidget(QScriptContext *context,
   QWidget *parent = (qscriptvalue_cast<QWidget*>(context->argument(0)));
   const char *objname = "_recurrenceWidget";
   if (context->argumentCount() > 1)
-    objname = context->argument(1).toString().toAscii().data();
+    objname = context->argument(1).toString().toLatin1().data();
   return engine->toScriptValue(new RecurrenceWidget(parent, objname));
 }
 

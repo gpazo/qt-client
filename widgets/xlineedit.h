@@ -11,7 +11,7 @@
 #ifndef xlineedit_h
 #define xlineedit_h
 
-#include <QAction>
+#include <QtWidgets/QAction>
 #include <QLineEdit>
 #include <QFocusEvent>
 #include <QKeyEvent>
