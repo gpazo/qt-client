@@ -22,6 +22,7 @@
 #include <QVariant>
 #include <QVector>
 #include <QtScript>
+#include <QtPrintSupport/QPrinter>
 
 class QString;
 

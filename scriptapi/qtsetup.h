@@ -14,11 +14,12 @@
 #include <Qt>
 #include <QtScript>
 #include <QTextDocument>
+#include <QTextCharFormat>
 
 void setupQt(QScriptEngine *engine);
 
 QScriptValue AlignmentFlagtoScriptValue(QScriptEngine *engine, const enum Qt::AlignmentFlag &p);
-QScriptValue AnchorAttributetoScriptValue(QScriptEngine *engine, const enum Qt::AnchorAttribute &p);
+QScriptValue AnchorAttributetoScriptValue(QScriptEngine *engine, const enum Qt::AnchorPoint &p);
 QScriptValue ApplicationAttributetoScriptValue(QScriptEngine *engine, const enum Qt::ApplicationAttribute &p);
 QScriptValue ArrowTypetoScriptValue(QScriptEngine *engine, const enum Qt::ArrowType &p);
 QScriptValue AspectRatioModetoScriptValue(QScriptEngine *engine, const enum Qt::AspectRatioMode &p);
@@ -81,7 +82,7 @@ QScriptValue WindowStatetoScriptValue(QScriptEngine *engine, const enum Qt::Wind
 QScriptValue WindowTypetoScriptValue(QScriptEngine *engine, const enum Qt::WindowType &p);
 
 void AlignmentFlagfromScriptValue(const QScriptValue &obj, enum Qt::AlignmentFlag &p);
-void AnchorAttributefromScriptValue(const QScriptValue &obj, enum Qt::AnchorAttribute &p);
+void AnchorAttributefromScriptValue(const QScriptValue &obj, enum Qt::AnchorPoint &p);
 void ApplicationAttributefromScriptValue(const QScriptValue &obj, enum Qt::ApplicationAttribute &p);
 void ArrowTypefromScriptValue(const QScriptValue &obj, enum Qt::ArrowType &p);
 void AspectRatioModefromScriptValue(const QScriptValue &obj, enum Qt::AspectRatioMode &p);

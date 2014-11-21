@@ -11,7 +11,7 @@
 #ifndef __XCHECKBOX_H__
 #define __XCHECKBOX_H__
 
-#include <QCheckBox>
+#include <QtWidgets/QCheckBox>
 #include <QPixmap>
 
 #include "widgets.h"

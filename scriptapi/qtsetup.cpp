@@ -30,8 +30,8 @@ void setupQt(QScriptEngine *engine)
   widget.setProperty("AlignVertical_Mask", QScriptValue(engine, Qt::AlignVertical_Mask), QScriptValue::ReadOnly | QScriptValue::Undeletable);
 
   qScriptRegisterMetaType(engine, AnchorAttributetoScriptValue,	AnchorAttributefromScriptValue);
-  widget.setProperty("AnchorName", QScriptValue(engine, Qt::AnchorName), QScriptValue::ReadOnly | QScriptValue::Undeletable);
-  widget.setProperty("AnchorHref", QScriptValue(engine, Qt::AnchorHref), QScriptValue::ReadOnly | QScriptValue::Undeletable);
+  widget.setProperty("AnchorName", QScriptValue(engine, QTextFormat::AnchorName), QScriptValue::ReadOnly | QScriptValue::Undeletable);
+  widget.setProperty("AnchorHref", QScriptValue(engine, QTextFormat::AnchorHref), QScriptValue::ReadOnly | QScriptValue::Undeletable);
 
   qScriptRegisterMetaType(engine, ApplicationAttributetoScriptValue,	ApplicationAttributefromScriptValue);
   widget.setProperty("AA_ImmediateWidgetCreation", QScriptValue(engine, Qt::AA_ImmediateWidgetCreation), QScriptValue::ReadOnly | QScriptValue::Undeletable);
@@ -725,7 +725,7 @@ void setupQt(QScriptEngine *engine)
   widget.setProperty("PlainText", QScriptValue(engine, Qt::PlainText), QScriptValue::ReadOnly | QScriptValue::Undeletable);
   widget.setProperty("RichText", QScriptValue(engine, Qt::RichText), QScriptValue::ReadOnly | QScriptValue::Undeletable);
   widget.setProperty("AutoText", QScriptValue(engine, Qt::AutoText), QScriptValue::ReadOnly | QScriptValue::Undeletable);
-  widget.setProperty("LogText", QScriptValue(engine, Qt::LogText), QScriptValue::ReadOnly | QScriptValue::Undeletable);
+  widget.setProperty("TextFormat", QScriptValue(engine, Qt::TextFormat), QScriptValue::ReadOnly | QScriptValue::Undeletable);
 
   qScriptRegisterMetaType(engine, TextInteractionFlagtoScriptValue,	TextInteractionFlagfromScriptValue);
   widget.setProperty("NoTextInteraction", QScriptValue(engine, Qt::NoTextInteraction), QScriptValue::ReadOnly | QScriptValue::Undeletable);
@@ -812,7 +812,8 @@ void setupQt(QScriptEngine *engine)
   widget.setProperty("WA_OpaquePaintEvent", QScriptValue(engine, Qt::WA_OpaquePaintEvent), QScriptValue::ReadOnly | QScriptValue::Undeletable);
   widget.setProperty("WA_OutsideWSRange", QScriptValue(engine, Qt::WA_OutsideWSRange), QScriptValue::ReadOnly | QScriptValue::Undeletable);
   widget.setProperty("WA_PaintOnScreen", QScriptValue(engine, Qt::WA_PaintOnScreen), QScriptValue::ReadOnly | QScriptValue::Undeletable);
-  widget.setProperty("WA_PaintOutsidePaintEvent", QScriptValue(engine, Qt::WA_PaintOutsidePaintEvent), QScriptValue::ReadOnly | QScriptValue::Undeletable);
+  //qt3 artifact, removed in qt5
+  //widget.setProperty("WA_PaintOutsidePaintEvent", QScriptValue(engine, Qt::WA_PaintOutsidePaintEvent), QScriptValue::ReadOnly | QScriptValue::Undeletable);
   widget.setProperty("WA_PaintUnclipped", QScriptValue(engine, Qt::WA_PaintUnclipped), QScriptValue::ReadOnly | QScriptValue::Undeletable);
   widget.setProperty("WA_PendingMoveEvent", QScriptValue(engine, Qt::WA_PendingMoveEvent), QScriptValue::ReadOnly | QScriptValue::Undeletable);
   widget.setProperty("WA_PendingResizeEvent", QScriptValue(engine, Qt::WA_PendingResizeEvent), QScriptValue::ReadOnly | QScriptValue::Undeletable);

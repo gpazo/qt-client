@@ -11,7 +11,7 @@
 #ifndef __QPRINTERPROTO_H__
 #define __QPRINTERPROTO_H__
 
-#include <QPrinter>
+#include <QtPrintSupport/QPrinter>
 #include <QtScript>
 
 class QString;
@@ -61,7 +61,7 @@ class QPrinterProto : public QObject, public QScriptable
     Q_INVOKABLE int             logicalDpiX() const;
     Q_INVOKABLE int             logicalDpiY() const;
     Q_INVOKABLE bool            newPage();
-    Q_INVOKABLE int             numColors() const;
+    Q_INVOKABLE int             colorCount() const;
     Q_INVOKABLE int             numCopies() const;
     Q_INVOKABLE QPrinter::Orientation     orientation() const;
     Q_INVOKABLE QString         outputFileName() const;

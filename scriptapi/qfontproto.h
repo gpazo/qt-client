@@ -14,6 +14,7 @@
 #include <QFont>
 #include <QObject>
 #include <QtScript>
+#include <QPaintDevice>
 
 class QString;
 

@@ -226,4 +226,7 @@ QT += sql \
     xml \
     script \
     network \
-    webkit
+    webkit \
+    webkitwidgets \
+    printsupport \
+    widgets

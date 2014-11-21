@@ -39,7 +39,8 @@ void setupQPrinterProto(QScriptEngine *engine)
   // enum QPrinter::OutputFormat
   constructor.setProperty("NativeFormat",    QScriptValue(engine, QPrinter::NativeFormat),    QScriptValue::ReadOnly | QScriptValue::Undeletable);
   constructor.setProperty("PdfFormat",       QScriptValue(engine, QPrinter::PdfFormat),       QScriptValue::ReadOnly | QScriptValue::Undeletable);
-  constructor.setProperty("PostScriptFormat",QScriptValue(engine, QPrinter::PostScriptFormat),QScriptValue::ReadOnly | QScriptValue::Undeletable);
+  //PostScriptFormat removed in qt5
+  //constructor.setProperty("PostScriptFormat",QScriptValue(engine, QPrinter::PostScriptFormat),QScriptValue::ReadOnly | QScriptValue::Undeletable);
 
   // enum QPrinter::PageOrder
   constructor.setProperty("FirstPageFirst",QScriptValue(engine, QPrinter::FirstPageFirst),QScriptValue::ReadOnly | QScriptValue::Undeletable);
@@ -292,11 +293,11 @@ bool QPrinterProto::newPage()
   return false;
 }
 
-int QPrinterProto::numColors() const
+int QPrinterProto::colorCount() const
 {
   QPrinter *item = qscriptvalue_cast<QPrinter*>(thisObject());
   if (item)
-    return item->numColors();
+    return item->colorCount();
   return 0;
 }
 
