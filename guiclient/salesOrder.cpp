@@ -3846,37 +3846,24 @@ void salesOrder::sNewSignatureCapture()
     bool isMobile = false;
     if(mobile.first())
       isMobile = mobile.value("isMobile").toBool();
-    else if (mobile.lastError().type() != QSqlError::NoError)
+    else if (ErrorReporter::error(QtCriticalMsg, this, tr("Unable to create query"),
+                                  mobile, __FILE__, __LINE__))
     {
-      systemError(this, mobile.lastError().databaseText(), __FILE__, __LINE__);
       return;
     }
-
     if(isMobile)
     {
         sSave(); //save the sales order to prevent record locking conflict
         QSqlDatabase db = QSqlDatabase::database();
         QString databaseName = db.databaseName();
-        XSqlQuery metric;
-        metric.exec("SELECT fetchMetricText('WebappHostname') as hostname,"
-                    "       fetchMetricText('WebappPort') as port; ");
-        QString hostName, port;
-         if(metric.first())
-         {
-             hostName = metric.value("hostname").toString();
-             port = metric.value("port").toString();
-         }
-         else if (metric.lastError().type() != QSqlError::NoError)
-         {
-           systemError(this, metric.lastError().databaseText(), __FILE__, __LINE__);
-           return;
-         }
-         QString URL = "https://"+ hostName +":"+port+"/"+databaseName+"/app#workspace/sales-order/"+_orderNumber->text() + "/popup-signature";
-         QDesktopServices::openUrl(QUrl(URL));
+        QString hostName = _metrics->value("WebappHostname");
+        QString port = _metrics->value("WebappPort"); //is port no longer required?
+        QString URL = "https://"+ hostName +":"+port+"/"+databaseName+"/private-extensions/source/inventory/client/signature-capture/signature-capture.html?id="+_orderNumber->text();
+        QDesktopServices::openUrl(QUrl(URL));
     }
     else
     {
-        QMessageBox::information(this, tr("Non-mobile database"),tr("You will need a web-enabled database in order to use this feature. Please contact your xTuple representative for more information."));
+        QMessageBox::information(this, tr("Non-web database"),tr("You will need a web-enabled database in order to use this feature. Please contact your xTuple representative for more information."));
     }
 }
 
