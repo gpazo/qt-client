@@ -11,9 +11,9 @@
 #include "version.h"
 
 QString _Name      = "xTuple ERP: %1 Edition";
-QString _Version   = "4.8.0";
-QString _dbVersion = "4.8.0";
-QString _Copyright = "Copyright (c) 1999-2014, OpenMFG, LLC.";
+QString _Version   = "4.9.0Beta";
+QString _dbVersion = "4.9.0Beta";
+QString _Copyright = "Copyright (c) 1999-2015, OpenMFG, LLC.";
 
 #ifdef __USEALTVERSION__
 #include "altVersion.cpp"
