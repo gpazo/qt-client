@@ -48,11 +48,7 @@ XTreeView::XTreeView(QWidget *parent) :
 
   setContextMenuPolicy(Qt::CustomContextMenu);
   header()->setStretchLastSection(false);
-#if QT_VERSION >= 0x050000
   header()->setSectionsClickable(true);
-#else
-  header()->setClickable(true);
-#endif
   header()->setContextMenuPolicy(Qt::CustomContextMenu);
 
   if (_x_preferences)
@@ -351,11 +347,7 @@ void XTreeView::setColumn(const QString &label, int width, int alignment, bool v
       break;
     }
   }
-#if QT_VERSION >= 0x050000
   header()->setSectionResizeMode(colnum, QHeaderView::Interactive);
-#else
-  header()->setResizeMode(colnum, QHeaderView::Interactive);
-#endif
 
   if (! cp->fromSettings)
     setColumnVisible(colnum, visible);

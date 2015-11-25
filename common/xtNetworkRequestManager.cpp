@@ -19,23 +19,21 @@
 
 #define DEBUG false
 
-xtNetworkRequestManager::xtNetworkRequestManager(const QUrl & url, QMutex &mutex) {
+xtNetworkRequestManager::xtNetworkRequestManager(const QUrl & url, QMutex &mutex, const QString &params) {
   nwam = new QNetworkAccessManager;
   _nwrep = 0;
   _response = 0;
   _url = url;
+  _params = params;
   _mutex = &mutex;
   _mutex->lock();
   _loop = new QEventLoop;
   startRequest(_url);
 }
 void xtNetworkRequestManager::startRequest(const QUrl & url) {
-    _nwrep = nwam->get(QNetworkRequest(url));
+    _nwrep = nwam->post(QNetworkRequest(url), _params.toUtf8());
     connect(_nwrep, SIGNAL(finished()), SLOT(requestCompleted()));
     connect(nwam, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)), this, SLOT(sslErrors(QNetworkReply*,QList<QSslError>)));
-#if QT_VERSION < 0x050000 //this feels hackish, ignore error or provide root cert, we'll ignore for now
-    connect(nwam, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)), _nwrep, SLOT(ignoreSslErrors()));
-#endif
     connect(nwam, SIGNAL(finished(QNetworkReply*)), _loop, SLOT(quit()));
     _loop->exec();
 }
@@ -65,7 +63,6 @@ void xtNetworkRequestManager::requestCompleted() {
   }
 }
 void xtNetworkRequestManager::sslErrors(QNetworkReply*, const QList<QSslError> &errors) {
-#if QT_VERSION >= 0x050000
     QString errorString;
        foreach (const QSslError &error, errors) {
            if (!errorString.isEmpty())
@@ -73,7 +70,9 @@ void xtNetworkRequestManager::sslErrors(QNetworkReply*, const QList<QSslError> &
            errorString += error.errorString();
        }
    qDebug() << "errorString= " << errorString;
-#endif
+}
+QByteArray xtNetworkRequestManager::response() {
+    return _response;
 }
 xtNetworkRequestManager::~xtNetworkRequestManager() {
     nwam->deleteLater();

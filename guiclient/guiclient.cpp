@@ -1711,12 +1711,7 @@ QString translationFile(QString localestr, const QString component)
 QString translationFile(QString localestr, const QString component, QString &version)
 {
   QStringList paths;
-#if QT_VERSION >= 0x050000
   paths << QStandardPaths::standardLocations(QStandardPaths::DataLocation);
-#else
-  //qDebug() << QDesktopServices::storageLocation(QDesktopServices::DataLocation);
-  paths << QDesktopServices::storageLocation(QDesktopServices::DataLocation);
-#endif
   paths << "/usr/lib/postbooks/dict";
   paths << "dict";
   paths << "";

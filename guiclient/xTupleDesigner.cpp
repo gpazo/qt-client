@@ -230,11 +230,7 @@ xTupleDesigner::xTupleDesigner(QWidget* parent, const char* name, Qt::WindowFlag
 
   // resource editor;
   // action editor;
-#if QT_VERSION >= 0x050000
   _integration = new QDesignerIntegration(_formeditor, this);
-#else
-  _integration = new qdesigner_internal::QDesignerIntegration(_formeditor, this);
-#endif
   _formeditor->setIntegration(_integration);
 
   // toolbar creation

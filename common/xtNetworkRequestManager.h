@@ -27,9 +27,10 @@ class xtNetworkRequestManager : public QObject
     Q_OBJECT
 
 public:
-    xtNetworkRequestManager(const QUrl &, QMutex &);
+    xtNetworkRequestManager(const QUrl &, QMutex &, const QString &params);
     virtual ~xtNetworkRequestManager();
 
+    Q_INVOKABLE virtual QByteArray response();
 
 protected slots:
     virtual void startRequest(const QUrl &);
@@ -44,6 +45,7 @@ private:
     QMutex * _mutex;
     QEventLoop *_loop;
     QUrl _url;
+    QString _params;
 };
 
 #endif

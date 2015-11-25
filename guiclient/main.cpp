@@ -97,11 +97,7 @@
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QTranslator>
-#if QT_VERSION < 0x050000
-#include <QHttp>
-#else
 #include <QUrlQuery>
-#endif
 #include <QUrl>
 
 #include <dbtools.h>
@@ -137,11 +133,7 @@ QString __password;
 
 #define DEBUG false
 
-#if QT_VERSION >= 0x050000
 extern void xTupleMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
-#else
-extern void xTupleMessageOutput(QtMsgType type, const char *msg);
-#endif
 // helps determine which edition we're running & what splash screen to present
 struct editionDesc {
   editionDesc(QString ed, QString splash, bool check, QString query)
@@ -172,11 +164,7 @@ int main(int argc, char *argv[])
   bool    _enhancedAuth   = false;
   bool    havePasswd      = false;
   bool    forceWelcomeStub= false;
-#if QT_VERSION >= 0x050000
   qInstallMessageHandler(xTupleMessageOutput);
-#else
-  qInstallMsgHandler(xTupleMessageOutput);
-#endif
   QApplication app(argc, argv);
   app.setOrganizationDomain("xTuple.com");
   app.setOrganizationName("xTuple");
@@ -477,7 +465,6 @@ int main(int argc, char *argv[])
       {
         db = metric.value("db").toString();
       }
-#if QT_VERSION >= 0x050000
       QUrlQuery urlQuery("https://www.xtuple.org/api/regviolation.php?");
       urlQuery.addQueryItem("key", rkey);
       urlQuery.addQueryItem("error", checkPassReason);
@@ -488,20 +475,9 @@ int main(int argc, char *argv[])
       urlQuery.addQueryItem("tot", QString::number(tot));
       urlQuery.addQueryItem("ver", _Version);
       QUrl url = urlQuery.query();
-#else
-      QUrl url;
-      url.setUrl("https://www.xtuple.org/api/regviolation.php");
-      url.addQueryItem("key", QUrl::toPercentEncoding(rkey));
-      url.addQueryItem("error", checkPassReason);
-      url.addQueryItem("name", name);
-      url.addQueryItem("dbname", dbname);
-      url.addQueryItem("db", QUrl::toPercentEncoding(db));
-      url.addQueryItem("cnt", QString::number(cnt));
-      url.addQueryItem("tot", QString::number(tot));
-      url.addQueryItem("ver", _Version);
-#endif
       QMutex wait;
-      xtNetworkRequestManager _networkManager(url, wait);
+      QString params = "";
+      xtNetworkRequestManager _networkManager(url, wait, params);
       if(forced)
         return 0;
 
