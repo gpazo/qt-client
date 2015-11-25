@@ -8,31 +8,35 @@
  * to be bound by its terms.
  */
 
-#ifndef DSPTAXRETURN_H
-#define DSPTAXRETURN_H
+#ifndef DSPQOHBYZONE_H
+#define DSPQOHBYZONE_H
 
 #include "guiclient.h"
-#include "xwidget.h"
-#include <parameter.h>
-#include "ui_dspTaxReturn.h"
+#include "display.h"
 
-class dspTaxReturn : public XWidget, public Ui::dspTaxReturn
+#include "ui_dspQOHByZone.h"
+
+class dspQOHByZone : public display, public Ui::dspQOHByZone
 {
     Q_OBJECT
 
 public:
-    dspTaxReturn(QWidget* parent = 0, const char* name = 0, Qt::WindowFlags fl = Qt::Window);
-    ~dspTaxReturn();
+    dspQOHByZone(QWidget* parent = 0, const char* name = 0, Qt::WindowFlags fl = Qt::Window);
+
     virtual bool setParams(ParameterList &);
+    virtual SetResponse set( const ParameterList & pParams );
 
 public slots:
-    virtual SetResponse set( const ParameterList & pParams );
-    virtual void sPrint();
-    virtual void sFillList();
+    virtual void sPopulateMenu(QMenu * pMenu, QTreeWidgetItem * pSelected, int);
+    virtual void sViewDetail();
+    virtual void sTransfer();
+    virtual void sAdjust();
+    virtual void sReset();
+    virtual void sMiscCount();
+    virtual void sIssueCountTag();
 
 protected slots:
     virtual void languageChange();
-
 };
 
-#endif // DSPTAXRETURN_H
+#endif // dspQOHByZone_H
